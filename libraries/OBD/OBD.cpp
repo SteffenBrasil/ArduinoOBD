@@ -231,8 +231,10 @@ char* COBD::getResponse(byte& pid, char* buffer, byte bufsize)
 {
 	while (receive(buffer, bufsize) > 0) {
 		char *p = buffer;
-		while ((p = strstr(p, "41 "))) {
-		    p += 3;
+		while ((p = strstr(p, "41"))) {
+		    p += 2;
+			if (*p == ' ')
+				p++;
 		    byte curpid = hex2uint8(p);
 		    if (pid == 0) pid = curpid;
 		    if (curpid == pid) {
@@ -298,31 +300,21 @@ float COBD::getVoltage()
 
 bool COBD::getVIN(char* buffer, byte bufsize)
 {
-	for (byte n = 0; n < 5; n++) {
-		if (sendCommand("0902\r", buffer, bufsize)) {
-			int len = hex2uint16(buffer);
-			char *p = strstr_P(buffer + 4, PSTR("0: 49 02 01"));
-			if (p) {
-				char *q = buffer;
-				p += 11; // skip the header
-				do {
-					while (*(++p) == ' ');
-					for (;;) {
-						*(q++) = hex2uint8(p);
-						while (*p && *p != ' ') p++;
-						while (*p == ' ') p++;
-						if (!*p || *p == '\r') break;
-					}
-					p = strchr(p, ':');
-				} while(p);
-				*q = 0;
-				if (q - buffer == len - 3) {
-					return true;
-				}
-			}
-		}
-		delay(100);
-	}
+	if (sendCommand("0902\r", buffer, bufsize)) {
+        char *p = strstr(buffer, "0: 49 02");
+        if (p) {
+            char *q = buffer;
+            p += 10;
+            do {
+                for (++p; *p == ' '; p += 3) {
+                    if (*q = hex2uint8(p + 1)) q++;
+                }
+                p = strchr(p, ':');
+            } while(p);
+            *q = 0;
+            return true;
+        }
+    }
     return false;
 }
 
@@ -415,7 +407,7 @@ void COBD::recover()
 
 bool COBD::init(OBD_PROTOCOLS protocol)
 {
-	const char *initcmd[] = {"ATZ\r", "ATE0\r", "ATH0\r"};
+	const char *initcmd[] = {"ATZ\r", "ATE0\r", "ATL1\r", "ATIB 10\r", "ATIIA 10\r", "ATSH 81 10 FC\r"};
 	char buffer[64];
 
 	m_state = OBD_DISCONNECTED;
@@ -441,8 +433,8 @@ bool COBD::init(OBD_PROTOCOLS protocol)
 		sendQuery(pid);
 		if (receive(buffer, sizeof(buffer), OBD_TIMEOUT_LONG) > 0) {
 			char *p = buffer;
-			while ((p = strstr(p, "41 "))) {
-				p += 3;
+			while ((p = strstr(p, "41"))) {
+				p += 2;
 				if (hex2uint8(p) == pid) {
 					p += 2;
 					for (byte n = 0; n < 4 && *(p + n * 3) == ' '; n++) {
