@@ -130,9 +130,9 @@ public:
 	// get connection state
 	virtual OBD_STATES getState() { return m_state; }
 	// read specified OBD-II PID value
-	virtual bool readPID(byte pid, int& result);
+	virtual bool readPID(byte pid, int& result, byte num_results);
 	// read multiple (up to 8) OBD-II PID values, return number of values obtained
-	virtual byte readPID(const byte pid[], byte count, int result[]);
+	virtual byte readPID(const byte pid[], byte count, int result[], byte num_results);
 	// set device into low power mode
 	virtual void enterLowPowerMode();
 	// wake up device from low power mode
@@ -152,7 +152,7 @@ public:
 	// read out MEMS data (acc for accelerometer, gyr for gyroscope, temp in 0.1 celcius degree)
 	virtual bool memsRead(int16_t* acc, int16_t* gyr = 0, int16_t* mag = 0, int16_t* temp = 0);
 	// send query for specified PID
-	virtual void sendQuery(byte pid);
+	virtual void sendQuery(byte pid, byte num_results);
 	// retrive and parse the response of specifie PID
 	virtual bool getResult(byte& pid, int& result);
 	// determine if the PID is supported

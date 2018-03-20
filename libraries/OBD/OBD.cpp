@@ -63,29 +63,29 @@ byte COBD::sendCommand(const char* cmd, char* buf, byte bufsize, int timeout)
 	return receive(buf, bufsize, timeout);
 }
 
-void COBD::sendQuery(byte pid)
+void COBD::sendQuery(byte pid, byte num_results)
 {
 	char cmd[8];
-	sprintf(cmd, "%02X%02X\r", dataMode, pid);
+	sprintf(cmd, "%02X%02X%01X\r", dataMode, pid, num_results);
 #ifdef DEBUG
 	debugOutput(cmd);
 #endif
 	write(cmd);
 }
 
-bool COBD::readPID(byte pid, int& result)
+bool COBD::readPID(byte pid, int& result, byte num_results)
 {
 	// send a query command
-	sendQuery(pid);
+	sendQuery(pid, num_results);
 	// receive and parse the response
 	return getResult(pid, result);
 }
 
-byte COBD::readPID(const byte pid[], byte count, int result[])
+byte COBD::readPID(const byte pid[], byte count, int result[], byte num_results)
 {
 	byte results = 0; 
 	for (byte n = 0; n < count; n++) {
-		if (readPID(pid[n], result[n])) {
+		if (readPID(pid[n], result[n], num_results)) {
 			results++;
 		}
 	}
@@ -430,7 +430,7 @@ bool COBD::init(OBD_PROTOCOLS protocol)
 	bool success = false;
 	for (byte i = 0; i < 4; i++) {
 		byte pid = i * 0x20;
-		sendQuery(pid);
+		sendQuery(pid, 1);
 		if (receive(buffer, sizeof(buffer), OBD_TIMEOUT_LONG) > 0) {
 			char *p = buffer;
 			while ((p = strstr(p, "41"))) {
