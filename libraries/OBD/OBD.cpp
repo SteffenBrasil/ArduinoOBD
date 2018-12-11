@@ -407,7 +407,7 @@ void COBD::recover()
 
 bool COBD::init(OBD_PROTOCOLS protocol)
 {
-	const char *initcmd[] = {"ATZ\r", "ATE0\r", "ATL1\r", "ATIB 10\r", "ATIIA 10\r", "ATSH 81 10 FC\r"};
+	const char *initcmd[] = {"ATZ\r", "ATE0\r"};
 	char buffer[64];
 
 	m_state = OBD_DISCONNECTED;
@@ -417,6 +417,14 @@ bool COBD::init(OBD_PROTOCOLS protocol)
 			return false;
 		}
 	}
+
+	while (initString is = initStrings.next()) {
+        write(is());
+        if (receive(buffer, sizeof(buffer), OBD_TIMEOUT_LONG) == 0) {
+            return false;
+        }
+    }
+
 	if (protocol != PROTO_AUTO) {
 		sprintf_P(buffer, PSTR("ATSP %u\r"), protocol);
 		write(buffer);
@@ -520,7 +528,20 @@ bool COBD::memsRead(int16_t* acc, int16_t* gyr, int16_t* mag, int16_t* temp)
 		}
 		if (!success) return false;
 	}
-	return true;	
+	return true;
+}
+
+uint16_t COBD::addInitString(initString i)
+{
+	initStrings.add(i);
+
+	return initStrings.size() - 1;
+}
+
+void COBD::removeInitString(uint16_t index)
+{
+	// @TODO: Implement this
+	return;
 }
 
 #ifdef DEBUG

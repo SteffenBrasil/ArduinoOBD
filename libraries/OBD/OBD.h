@@ -6,6 +6,7 @@
 *************************************************************************/
 
 #include <Arduino.h>
+#include "List.h"
 
 #define OBD_MODEL_UART 0
 #define OBD_MODEL_I2C 1
@@ -112,6 +113,8 @@ typedef enum {
 	OBD_FAILED = 3
 } OBD_STATES;
 
+typedef char* (* initString)(void);
+
 uint16_t hex2uint16(const char *p);
 uint8_t hex2uint8(const char *p);
 
@@ -159,6 +162,10 @@ public:
 	virtual bool isValidPID(byte pid);
 	// get adapter firmware version
 	virtual byte getVersion();
+
+	virtual uint16_t addInitString(initString i);
+
+	virtual void removeInitString(uint16_t index);
 	// set current PID mode
 	byte dataMode;
 	// number of subsequent errors
@@ -173,6 +180,7 @@ protected:
 	void recover();
 	void debugOutput(const char* s);
 	int normalizeData(byte pid, char* data);
+	List<initString> initStrings;
 	OBD_STATES m_state;
 private:
 	virtual uint8_t getPercentageValue(char* data)
