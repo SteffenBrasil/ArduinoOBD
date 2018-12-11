@@ -1,6 +1,19 @@
 Arduino OBD-II Adapter Library & Sketches
 =========================================
 
+This is fork of the original repository, aimed at adding functionality to the OBD library.
+Please only submit issues against the libraries/OBD component.
+
+Please see the [Freematics repository](https://github.com/stanleyhuangyc/ArduinoOBD) for any other components
+
+Wishlist
+
+* Ability to dynamically add/remove INIT commands
+* Advanced statistics calculation like current gear
+
+Original README.md
+==================
+
 (C)2012-2018 Freematics.com
 
 OBD-II Adapter for Arduino is a product that works as a vehicle OBD-II data bridge for Arduino (literally all embedded platforms) with open-source Arduino library provided. Besides providing easy-to-use OBD-II data access, it also integrates 9-DOF motion sensor and voltmeter for measuring vehicle battery power. The adapter draws power from OBD-II port and convert it to 5V for powering attached device.
